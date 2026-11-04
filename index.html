@@ -1,0 +1,1101 @@
+from pathlib import Path
+
+code = r'''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhonePromo - Smartphone Deals</title>
+
+    <!-- jQuery Library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <style>
+        /* General styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5fa;
+            color: #222;
+        }
+
+        button {
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        /* Navigation */
+        header {
+            background: #17152d;
+            color: white;
+            padding: 18px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo {
+            font-size: 27px;
+            font-weight: bold;
+            color: #ff70b5;
+        }
+
+        .logo span {
+            color: #75ddff;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        nav a:hover {
+            color: #ff70b5;
+        }
+
+        .account-btn,
+        .cart {
+            padding: 10px 14px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .account-btn {
+            background: transparent;
+            color: white;
+            border: 1px solid #ff70b5;
+        }
+
+        .signup-btn,
+        .cart {
+            background: #ff70b5;
+            color: #17152d;
+            border: none;
+        }
+
+        /* Hero banner */
+        .hero {
+            width: 90%;
+            min-height: 350px;
+            margin: 30px auto;
+            padding: 35px;
+            border-radius: 25px;
+            background: linear-gradient(120deg, #ffb5d8, #c8b6ff, #a9eaff);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .hero-content {
+            max-width: 500px;
+        }
+
+        .hero h4 {
+            color: #6b35b5;
+            letter-spacing: 3px;
+        }
+
+        .hero h1 {
+            font-size: clamp(34px, 5vw, 48px);
+            margin: 18px 0;
+            color: #17152d;
+        }
+
+        .hero h1 span {
+            color: #e52686;
+        }
+
+        .hero p {
+            line-height: 1.7;
+            margin-bottom: 22px;
+        }
+
+        .hero-image {
+            width: 300px;
+            height: 280px;
+            object-fit: contain;
+            border-radius: 16px;
+        }
+
+        .shop-btn {
+            background: #17152d;
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 25px;
+            font-weight: bold;
+        }
+
+        .shop-btn:hover {
+            background: #e52686;
+        }
+
+        /* Main content */
+        main {
+            width: 90%;
+            margin: 45px auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .section-title span {
+            color: #e52686;
+        }
+
+        .description {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        /* Search and filters */
+        .controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .controls input,
+        .controls select {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            font-size: 15px;
+        }
+
+        #search {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        /* Product cards */
+        .products {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 22px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 5px 18px #27204d12;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-7px);
+            box-shadow: 0 12px 28px #27204d25;
+        }
+
+        /* Coloured image boxes */
+        .phone-image {
+            height: 255px;
+            padding: 15px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .pink {
+            background: linear-gradient(135deg, #ffd1e6, #ff82bd);
+        }
+
+        .blue {
+            background: linear-gradient(135deg, #c7e5ff, #739bff);
+        }
+
+        .green {
+            background: linear-gradient(135deg, #caffdf, #69dcb3);
+        }
+
+        .orange {
+            background: linear-gradient(135deg, #ffe5c2, #ffad7d);
+        }
+
+        .phone-image img {
+            display: block;
+            width: 100%;
+            height: 220px;
+            object-fit: contain;
+            transition: transform 0.4s ease;
+        }
+
+        .card:hover .phone-image img {
+            transform: scale(1.08);
+        }
+
+        .offer {
+            position: absolute;
+            top: 13px;
+            left: 12px;
+            z-index: 1;
+            background: #17152d;
+            color: white;
+            padding: 7px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .card-content {
+            padding: 20px;
+        }
+
+        .brand {
+            color: #e52686;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card h3 {
+            margin: 10px 0;
+            font-size: 20px;
+        }
+
+        .specs {
+            color: #777;
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        .price {
+            font-size: 21px;
+            font-weight: bold;
+            color: #17152d;
+        }
+
+        .old-price {
+            color: #999;
+            text-decoration: line-through;
+            font-size: 13px;
+            margin-left: 5px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 17px;
+        }
+
+        .actions button {
+            flex: 1;
+            padding: 10px 5px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .add {
+            background: #e52686;
+            color: white;
+            border: none;
+        }
+
+        .add:hover {
+            background: #bd146b;
+        }
+
+        .details {
+            background: white;
+            border: 1px solid #ccc;
+            color: #17152d;
+        }
+
+        .details:hover {
+            background: #f1eaff;
+        }
+
+        #emptyMessage {
+            display: none;
+            background: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 12px;
+        }
+
+        /* Benefits */
+        .benefits {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 50px;
+        }
+
+        .benefit {
+            text-align: center;
+            background: white;
+            padding: 28px 20px;
+            border-radius: 18px;
+            box-shadow: 0 5px 18px #27204d10;
+        }
+
+        .emoji {
+            font-size: 35px;
+        }
+
+        .benefit h3 {
+            margin: 14px 0;
+        }
+
+        .benefit p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* Sign-in and sign-up modal backgrounds */
+        .account-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(15, 12, 35, 0.75);
+            padding: 20px;
+            align-items: center;
+            justify-content: center;
+            overflow-y: auto;
+        }
+
+        .account-modal {
+            position: relative;
+            width: 100%;
+            max-width: 430px;
+            max-height: 95vh;
+            overflow-y: auto;
+            padding: 30px;
+            border-radius: 18px;
+            background: white;
+            box-shadow: 0 18px 50px #00000030;
+        }
+
+        .account-modal h2 {
+            color: #17152d;
+            margin-bottom: 10px;
+        }
+
+        .form-description {
+            color: #666;
+            margin-bottom: 22px;
+            line-height: 1.5;
+        }
+
+        .account-modal form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .account-modal label {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .account-modal input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        .account-modal input:focus {
+            outline: 2px solid #ffb5d8;
+            border-color: #e52686;
+        }
+
+        .submit-account {
+            background: #e52686;
+            color: white;
+            border: none;
+            padding: 13px;
+            border-radius: 9px;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            border: none;
+            background: transparent;
+            font-size: 27px;
+            color: #555;
+        }
+
+        .switch-form {
+            text-align: center;
+            margin-top: 18px;
+            font-size: 14px;
+        }
+
+        .switch-form button {
+            border: none;
+            background: transparent;
+            color: #e52686;
+            font-weight: bold;
+        }
+
+        /* Notification */
+        #notice {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 110;
+            background: #17152d;
+            color: white;
+            padding: 16px 22px;
+            border-radius: 10px;
+            max-width: 90%;
+        }
+
+        /* Footer */
+        footer {
+            background: #17152d;
+            color: white;
+            text-align: center;
+            padding: 28px;
+            margin-top: 50px;
+            line-height: 1.8;
+        }
+
+        /* Responsive layout */
+        @media (max-width: 1000px) {
+            .products {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 600px) {
+            header {
+                padding: 18px 5%;
+            }
+
+            nav {
+                gap: 10px;
+            }
+
+            nav a {
+                font-size: 13px;
+            }
+
+            .hero {
+                width: 92%;
+                flex-direction: column;
+                text-align: center;
+                padding: 25px;
+            }
+
+            .hero-image {
+                width: 230px;
+                height: 220px;
+            }
+
+            main {
+                width: 92%;
+            }
+
+            .products,
+            .benefits {
+                grid-template-columns: 1fr;
+            }
+
+            .account-modal {
+                padding: 25px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVIGATION BAR -->
+    <header>
+        <div class="logo">PHONE<span>PROMO</span></div>
+
+        <nav>
+            <a href="#home">Home</a>
+            <a href="#phones">Phones</a>
+            <a href="#offers">Offers</a>
+
+            <button type="button" class="account-btn" id="openSignIn">
+                Sign In
+            </button>
+
+            <button type="button" class="account-btn signup-btn" id="openSignUp">
+                Sign Up
+            </button>
+
+            <button type="button" class="cart" id="cartButton">
+                🛒 Cart (<span id="cartCount">0</span>)
+            </button>
+        </nav>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h4>THE SMARTPHONE SALE</h4>
+
+            <h1>
+                Your Style.<br>
+                <span>Your Phone.</span>
+            </h1>
+
+            <p>
+                Discover stunning smartphones, vibrant colours,
+                amazing cameras and exciting promotional deals.
+                Find your perfect phone at PhonePromo!
+            </p>
+
+            <button type="button" class="shop-btn" id="shopNow">
+                Explore Deals ↓
+            </button>
+        </div>
+
+        <img
+            class="hero-image"
+            src="apple.jpg"
+            alt="Apple smartphone"
+        >
+    </section>
+
+    <!-- PHONE COLLECTION -->
+    <main>
+        <section id="phones">
+            <h2 class="section-title">
+                Our <span>Phone Collection</span>
+            </h2>
+
+            <p class="description">
+                Explore the latest smartphones at special prices!
+            </p>
+
+            <!-- SEARCH, FILTER AND SORT -->
+            <div class="controls">
+                <input
+                    type="text"
+                    id="search"
+                    placeholder="Search phones or brands..."
+                    aria-label="Search phones"
+                >
+
+                <select id="brandFilter" aria-label="Filter by brand">
+                    <option value="all">All Brands</option>
+                    <option value="Apple">Apple</option>
+                    <option value="Samsung">Samsung</option>
+                    <option value="Google">Google</option>
+                    <option value="OnePlus">OnePlus</option>
+                </select>
+
+                <select id="sortPrice" aria-label="Sort by price">
+                    <option value="default">Featured Phones</option>
+                    <option value="low">Price: Low to High</option>
+                    <option value="high">Price: High to Low</option>
+                </select>
+            </div>
+
+            <!-- PRODUCT CARDS -->
+            <div class="products" id="productGrid">
+
+                <!-- APPLE PHONE -->
+                <div
+                    class="card"
+                    data-brand="Apple"
+                    data-price="79900"
+                    data-name="iPhone 16"
+                >
+                    <div class="phone-image pink">
+                        <span class="offer">SPECIAL OFFER</span>
+                        <img src="apple.jpg" alt="Apple smartphone">
+                    </div>
+
+                    <div class="card-content">
+                        <p class="brand">Apple</p>
+                        <h3>iPhone 16</h3>
+                        <p class="specs">128 GB | Advanced Camera</p>
+
+                        <p>
+                            <span class="price">₹79,900</span>
+                            <span class="old-price">₹89,900</span>
+                        </p>
+
+                        <div class="actions">
+                            <button type="button" class="add">Add to Cart</button>
+                            <button type="button" class="details">Details</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SAMSUNG PHONE -->
+                <div
+                    class="card"
+                    data-brand="Samsung"
+                    data-price="69999"
+                    data-name="Galaxy S24"
+                >
+                    <div class="phone-image blue">
+                        <span class="offer">BEST SELLER</span>
+                        <img src="samsung-2.jpg" alt="Samsung smartphone">
+                    </div>
+
+                    <div class="card-content">
+                        <p class="brand">Samsung</p>
+                        <h3>Galaxy S24</h3>
+                        <p class="specs">256 GB | AMOLED Display</p>
+
+                        <p>
+                            <span class="price">₹69,999</span>
+                            <span class="old-price">₹79,999</span>
+                        </p>
+
+                        <div class="actions">
+                            <button type="button" class="add">Add to Cart</button>
+                            <button type="button" class="details">Details</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GOOGLE PHONE -->
+                <div
+                    class="card"
+                    data-brand="Google"
+                    data-price="59999"
+                    data-name="Google Phone"
+                >
+                    <div class="phone-image green">
+                        <span class="offer">NEW ARRIVAL</span>
+                        <img src="gphone.jpg" alt="Google smartphone">
+                    </div>
+
+                    <div class="card-content">
+                        <p class="brand">Google</p>
+                        <h3>Google Pixel</h3>
+                        <p class="specs">128 GB | Smart Camera</p>
+
+                        <p>
+                            <span class="price">₹59,999</span>
+                            <span class="old-price">₹69,999</span>
+                        </p>
+
+                        <div class="actions">
+                            <button type="button" class="add">Add to Cart</button>
+                            <button type="button" class="details">Details</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ONEPLUS PHONE -->
+                <div
+                    class="card"
+                    data-brand="OnePlus"
+                    data-price="42999"
+                    data-name="OnePlus 12R"
+                >
+                    <div class="phone-image orange">
+                        <span class="offer">GREAT VALUE</span>
+                        <img src="oneplus.jpg" alt="OnePlus smartphone">
+                    </div>
+
+                    <div class="card-content">
+                        <p class="brand">OnePlus</p>
+                        <h3>OnePlus 12R</h3>
+                        <p class="specs">256 GB | Fast Charging</p>
+
+                        <p>
+                            <span class="price">₹42,999</span>
+                            <span class="old-price">₹49,999</span>
+                        </p>
+
+                        <div class="actions">
+                            <button type="button" class="add">Add to Cart</button>
+                            <button type="button" class="details">Details</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div id="emptyMessage">
+                No phones found. Please try another search!
+            </div>
+        </section>
+
+        <!-- BENEFITS SECTION -->
+        <section class="benefits" id="offers">
+            <div class="benefit">
+                <div class="emoji">🚚</div>
+                <h3>Free Delivery</h3>
+                <p>Enjoy free standard delivery on eligible orders.</p>
+            </div>
+
+            <div class="benefit">
+                <div class="emoji">🎁</div>
+                <h3>Special Offers</h3>
+                <p>Discover exciting deals on selected smartphones.</p>
+            </div>
+
+            <div class="benefit">
+                <div class="emoji">💬</div>
+                <h3>Customer Support</h3>
+                <p>Compare phone features and choose your ideal device.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- SIGN IN FORM -->
+    <div class="account-overlay" id="signInOverlay">
+        <div class="account-modal" role="dialog" aria-modal="true" aria-labelledby="signInTitle">
+            <button type="button" class="close-modal" aria-label="Close">&times;</button>
+
+            <h2 id="signInTitle">Welcome Back!</h2>
+            <p class="form-description">
+                Sign in to your PhonePromo account.
+            </p>
+
+            <form id="signInForm">
+                <label for="signInEmail">Email Address *</label>
+                <input
+                    type="email"
+                    id="signInEmail"
+                    name="email"
+                    placeholder="Enter your email"
+                    autocomplete="email"
+                    required
+                >
+
+                <label for="signInPassword">Password *</label>
+                <input
+                    type="password"
+                    id="signInPassword"
+                    name="password"
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                    required
+                >
+
+                <button type="submit" class="submit-account">Sign In</button>
+            </form>
+
+            <p class="switch-form">
+                Don't have an account?
+                <button type="button" id="switchToSignUp">Sign Up</button>
+            </p>
+        </div>
+    </div>
+
+    <!-- SIGN UP FORM -->
+    <div class="account-overlay" id="signUpOverlay">
+        <div class="account-modal" role="dialog" aria-modal="true" aria-labelledby="signUpTitle">
+            <button type="button" class="close-modal" aria-label="Close">&times;</button>
+
+            <h2 id="signUpTitle">Create Account</h2>
+            <p class="form-description">
+                Fill in all required fields to join PhonePromo.
+            </p>
+
+            <form id="signUpForm">
+                <label for="fullName">Full Name *</label>
+                <input
+                    type="text"
+                    id="fullName"
+                    name="fullName"
+                    placeholder="Enter your full name"
+                    autocomplete="name"
+                    required
+                >
+
+                <label for="signUpEmail">Email Address *</label>
+                <input
+                    type="email"
+                    id="signUpEmail"
+                    name="email"
+                    placeholder="Enter your email"
+                    autocomplete="email"
+                    required
+                >
+
+                <label for="phoneNumber">Phone Number *</label>
+                <input
+                    type="tel"
+                    id="phoneNumber"
+                    name="phoneNumber"
+                    placeholder="Enter your 10-digit phone number"
+                    autocomplete="tel"
+                    inputmode="numeric"
+                    pattern="[0-9]{10}"
+                    minlength="10"
+                    maxlength="10"
+                    title="Enter a 10-digit phone number"
+                    required
+                >
+
+                <label for="signUpPassword">Password *</label>
+                <input
+                    type="password"
+                    id="signUpPassword"
+                    name="password"
+                    placeholder="Create a password (minimum 8 characters)"
+                    autocomplete="new-password"
+                    minlength="8"
+                    required
+                >
+
+                <button type="submit" class="submit-account">
+                    Create Account
+                </button>
+            </form>
+
+            <p class="switch-form">
+                Already have an account?
+                <button type="button" id="switchToSignIn">Sign In</button>
+            </p>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <h3>PHONEPROMO</h3>
+        <p>Your Style. Your Phone. Your Deal.</p>
+        <p>Ex.No. 07 - Working with jQuery</p>
+    </footer>
+
+    <!-- NOTIFICATION -->
+    <div id="notice" role="status"></div>
+
+    <!-- JQUERY ACTIONS -->
+    <script>
+        $(document).ready(function () {
+            let cartCount = 0;
+
+            /* OPEN SIGN IN / SIGN UP FORMS */
+
+            function openAccountModal(modalId) {
+                $(".account-overlay").hide();
+                $("#" + modalId).css("display", "flex");
+            }
+
+            $("#openSignIn").click(function () {
+                openAccountModal("signInOverlay");
+            });
+
+            $("#openSignUp").click(function () {
+                openAccountModal("signUpOverlay");
+            });
+
+            $("#switchToSignUp").click(function () {
+                openAccountModal("signUpOverlay");
+            });
+
+            $("#switchToSignIn").click(function () {
+                openAccountModal("signInOverlay");
+            });
+
+            $(".close-modal").click(function () {
+                $(this).closest(".account-overlay").hide();
+            });
+
+            $(".account-overlay").click(function (event) {
+                if (event.target === this) {
+                    $(this).hide();
+                }
+            });
+
+            /* SIGN UP FORM VALIDATION */
+
+            $("#signUpForm").submit(function (event) {
+                event.preventDefault();
+
+                if (!this.checkValidity()) {
+                    this.reportValidity();
+                    return;
+                }
+
+                let customerName = $("#fullName").val().trim();
+
+                if (customerName === "") {
+                    alert("Please enter your full name.");
+                    return;
+                }
+
+                alert(
+                    "Welcome to PhonePromo, " + customerName +
+                    "! Your demo sign-up form is valid."
+                );
+
+                this.reset();
+                $("#signUpOverlay").hide();
+                openAccountModal("signInOverlay");
+            });
+
+            /* SIGN IN FORM VALIDATION */
+
+            $("#signInForm").submit(function (event) {
+                event.preventDefault();
+
+                if (!this.checkValidity()) {
+                    this.reportValidity();
+                    return;
+                }
+
+                alert(
+                    "The sign-in form is valid. A backend is needed " +
+                    "to verify your account."
+                );
+
+                this.reset();
+                $("#signInOverlay").hide();
+            });
+
+            /* SCROLL TO PHONE COLLECTION */
+
+            $("#shopNow").click(function () {
+                $("html, body").animate(
+                    {
+                        scrollTop: $("#phones").offset().top - 60
+                    },
+                    600
+                );
+            });
+
+            /* SEARCH AND FILTER PHONES */
+
+            function filterPhones() {
+                let keyword = $("#search").val().toLowerCase().trim();
+                let selectedBrand = $("#brandFilter").val();
+                let visibleCount = 0;
+
+                $("#productGrid .card").each(function () {
+                    let name = String($(this).data("name")).toLowerCase();
+                    let brand = String($(this).data("brand")).toLowerCase();
+
+                    let matchesSearch =
+                        name.includes(keyword) || brand.includes(keyword);
+
+                    let matchesBrand =
+                        selectedBrand === "all" ||
+                        $(this).data("brand") === selectedBrand;
+
+                    let show = matchesSearch && matchesBrand;
+
+                    $(this).toggle(show);
+
+                    if (show) {
+                        visibleCount++;
+                    }
+                });
+
+                $("#emptyMessage").toggle(visibleCount === 0);
+            }
+
+            $("#search").on("input", filterPhones);
+            $("#brandFilter").change(filterPhones);
+
+            /* SORT PHONES BY PRICE */
+
+            $("#sortPrice").change(function () {
+                let mode = $(this).val();
+                let cards = $("#productGrid .card").get();
+
+                if (mode === "low") {
+                    cards.sort(function (a, b) {
+                        return Number($(a).data("price")) -
+                               Number($(b).data("price"));
+                    });
+                } else if (mode === "high") {
+                    cards.sort(function (a, b) {
+                        return Number($(b).data("price")) -
+                               Number($(a).data("price"));
+                    });
+                } else {
+                    let order = [
+                        "iPhone 16",
+                        "Galaxy S24",
+                        "Google Phone",
+                        "OnePlus 12R"
+                    ];
+
+                    cards.sort(function (a, b) {
+                        return order.indexOf($(a).data("name")) -
+                               order.indexOf($(b).data("name"));
+                    });
+                }
+
+                $("#productGrid").append(cards);
+                filterPhones();
+            });
+
+            /* ADD PHONE TO CART */
+
+            $(".products").on("click", ".add", function () {
+                cartCount++;
+                $("#cartCount").text(cartCount);
+
+                let phoneName = $(this)
+                    .closest(".card")
+                    .data("name");
+
+                $("#notice")
+                    .text(phoneName + " added to your cart!")
+                    .stop(true, true)
+                    .fadeIn(200)
+                    .delay(1500)
+                    .fadeOut(400);
+            });
+
+            /* SHOW PHONE DETAILS */
+
+            $(".products").on("click", ".details", function () {
+                let card = $(this).closest(".card");
+
+                let name = card.data("name");
+                let brand = card.data("brand");
+                let price = Number(card.data("price"));
+
+                alert(
+                    "Phone: " + name +
+                    "\nBrand: " + brand +
+                    "\nPrice: ₹" + price.toLocaleString("en-IN")
+                );
+            });
+
+            /* SHOW CART COUNT */
+
+            $("#cartButton").click(function () {
+                alert("Your cart contains " + cartCount + " item(s).");
+            });
+        });
+    </script>
+
+</body>
+</html>
+'''
+out = Path("/mnt/data/phonepromo_full_code.html")
+out.write_text(code, encoding="utf-8")
+print(f"Created full HTML file: {out}")
